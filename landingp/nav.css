@@ -1,0 +1,131 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #ded9d9;
+    overflow-x: hidden;
+    background-blend-mode: overlay;
+}
+
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #396e38;
+    padding: 10px 20px;
+    color: white;
+}
+
+.nav-left,
+.nav-right {
+    display: flex;
+    align-items: center;
+}
+
+.nav-link {
+    color: white;
+    text-decoration: none;
+    margin: 0 15px;
+    font-size: 16px;
+    padding: 8px 16px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.nav-link:hover {
+    background-color: rgba(114, 117, 116, 0.23);
+}
+
+.navbar-brand {
+    flex: 1;
+    height: 40px;
+}
+
+.navbar-logo {
+    margin-left: 20px;
+    min-height: 40px;
+    max-width: 45px;
+}
+
+.cont {
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: fixed;
+    margin: 0;
+}
+
+.overlay {
+    position: absolute;
+    width: 50%;
+    height: 40%;
+    margin-left: 23%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1;
+}
+.close{
+    position: absolute;
+    right: 28px;
+}
+
+.content-data {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.712);
+    top: 20%;
+    left: -30%;
+}
+
+.content-data h1 {
+    margin: 0;
+    font-size: 2.5em;
+}
+
+.content-data p {
+    font-size: 1.5em;
+    margin-left: 22vh;
+}
+.content-data p1 {
+    font-size: 2em;
+    margin: 0;
+    
+
+}
+
+.newContent {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+}
+
+.newImg {
+    position: absolute;
+    opacity: 0.7;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(1);
+    z-index: -2;
+}
+
+.background {
+    background-color: #353232cc;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    z-index: -1;
+}
+
+.popup {
+    display: none;
+    height: 64dvh;
+    width: 28dvw;
+    z-index: 5;
+    left: 39%;
+    top: 24%;
+    position: fixed;
+}
