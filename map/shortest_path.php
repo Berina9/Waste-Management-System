@@ -1,77 +1,66 @@
-<?php
-header('Content-Type: application/json');
-
-function dijkstra($graph, $start) {
-    $distances = [];
-    $previous = [];
-    $queue = [];
-
-    foreach ($graph as $vertex => $neighbors) {
-        if ($vertex === $start) {
-            $distances[$vertex] = 0;
+<script>
+function dijkstra(graph, start, end) {
+    let distances = {};
+    let previous = {};
+    let nodes = new PriorityQueue();
+    
+    // Initialize distances and nodes
+    for (let node in graph) {
+        if (node === start) {
+            distances[node] = 0;
+            nodes.enqueue(node, 0);
         } else {
-            $distances[$vertex] = INF;
+            distances[node] = Infinity;
+            nodes.enqueue(node, Infinity);
         }
-        $previous[$vertex] = null;
-        $queue[$vertex] = $distances[$vertex];
+        previous[node] = null;
     }
-
-    while (!empty($queue)) {
-        $minVertex = array_search(min($queue), $queue);
-        unset($queue[$minVertex]);
-
-        if ($distances[$minVertex] === INF) {
+    
+    while (!nodes.isEmpty()) {
+        let smallest = nodes.dequeue();
+        if (smallest === end) {
+            let path = [];
+            while (previous[smallest]) {
+                path.push(smallest);
+                smallest = previous[smallest];
+            }
+            path.push(start);
+            return path.reverse();
+        }
+        
+        if (distances[smallest] === Infinity) {
             break;
         }
-
-        foreach ($graph[$minVertex] as $neighbor => $cost) {
-            $alt = $distances[$minVertex] + $cost;
-            if ($alt < $distances[$neighbor]) {
-                $distances[$neighbor] = $alt;
-                $previous[$neighbor] = $minVertex;
-                $queue[$neighbor] = $alt;
+        
+        for (let neighbor in graph[smallest]) {
+            let alt = distances[smallest] + graph[smallest][neighbor];
+            if (alt < distances[neighbor]) {
+                distances[neighbor] = alt;
+                previous[neighbor] = smallest;
+                nodes.enqueue(neighbor, distances[neighbor]);
             }
         }
     }
-
-    return ['distances' => $distances, 'previous' => $previous];
+    
+    return []; // No path found
 }
 
-function shortestPath($graph, $start, $end) {
-    $dijkstraResult = dijkstra($graph, $start);
-    $distances = $dijkstraResult['distances'];
-    $previous = $dijkstraResult['previous'];
-
-    $path = [];
-    $current = $end;
-
-    while ($current !== null) {
-        array_unshift($path, $current);
-        $current = $previous[$current];
+// Priority Queue implementation
+class PriorityQueue {
+    constructor() {
+        this.collection = [];
     }
-
-    if ($path[0] === $start) {
-        return ['distance' => $distances[$end], 'path' => $path];
-    } else {
-        return ['distance' => INF, 'path' => []];
+    
+    enqueue(element, priority) {
+        this.collection.push({ element, priority });
+        this.collection.sort((a, b) => a.priority - b.priority);
+    }
+    
+    dequeue() {
+        return this.collection.shift().element;
+    }
+    
+    isEmpty() {
+        return this.collection.length === 0;
     }
 }
-
-// Example graph (You can replace this with your actual graph)
-$graph = [
-    'Kathmandu' => ['Point1' => 1, 'Point2' => 4],
-    'Point1' => ['Kathmandu' => 1, 'Point2' => 2, 'Point3' => 5],
-    'Point2' => ['Kathmandu' => 4, 'Point1' => 2, 'Pokhara' => 3],
-    'Point3' => ['Point1' => 5, 'Pokhara' => 1],
-    'Pokhara' => ['Point2' => 3, 'Point3' => 1],
-];
-
-// Fetch start and end from the request
-$start = $_GET['start'] ?? 'Kathmandu';
-$end = $_GET['end'] ?? 'Pokhara';
-
-$result = shortestPath($graph, $start, $end);
-
-// Output the result as JSON
-echo json_encode($result);
-?>

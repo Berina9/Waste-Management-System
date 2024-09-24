@@ -20,7 +20,6 @@
 <h2>Leaflet.js Road Map Example</h2>
 <div id="map"></div>
 <div id="controls">
-    <p>Click on two points on the map to calculate the distance between them.</p>
     <p id="distance"></p>
     <button id="clearButton">Clear Markers</button>
 </div>
@@ -37,43 +36,142 @@
         attribution: '&copy; OpenStreetMap contributors'
     }).addTo(map);
 
-    // Click event to place markers on the map
-    map.on('click', function(e) {
-        if (markers.length < 4) {
-            console.log(markers)
-            var marker = L.marker(e.latlng).addTo(map);
-            markers.push(marker);
+    // Graph data and coordinates
+    var graph = {}; // Initialize with your graph data if available
+    var coordinates = {};
 
-            // When two points are selected
-            if (markers.length === 2) {
-                calculateDistance();
-            }
-        }
-    });
+    // Fetch coordinates from PHP script
+    function fetchCoordinates() {
+        fetch('getPlusCodes.php') // Adjust the path as needed
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    console.error('Error fetching coordinates:', data.error);
+                    return;
+                }
 
-    // Function to calculate distance between two points
-    function calculateDistance() {
-        var latlngs = markers.map(function(marker) {
-            return marker.getLatLng();
-        });
+                // Process admin coordinates
+                data.adminCoordinates.forEach((coord, index) => {
+                    var [lat, lng] = coord.split(',').map(Number);
+                    coordinates['admin' + index] = [lat, lng];
+                    addMarker(lat, lng, 'admin');
+                });
 
-        // Draw a line between the two points
+                // Process driver coordinates
+                data.driverCoordinates.forEach((coord, index) => {
+                    var [lat, lng] = coord.split(',').map(Number);
+                    coordinates['driver' + index] = [lat, lng];
+                    addMarker(lat, lng, 'driver');
+                });
+
+                // Example graph data (you will need actual data from your DB)
+                graph = {
+                    'admin0': { 'node1': 10, 'node2': 15 },
+                    'node1': { 'admin0': 10, 'node2': 12, 'node3': 5 },
+                    'node2': { 'admin0': 15, 'node1': 12, 'node3': 8 },
+                    'node3': { 'node1': 5, 'node2': 8, 'driver0': 10 },
+                    'driver0': { 'node3': 10 }
+                };
+
+                // Find shortest path from an admin to a driver
+                var start = 'admin0'; // Update this based on actual data
+                var end = 'driver0'; // Update this based on actual data
+                var shortestPath = dijkstra(graph, start, end);
+                plotShortestPath(shortestPath);
+            })
+            .catch(error => console.error('Error fetching coordinates:', error));
+    }
+
+    // Function to add a marker using coordinates
+    function addMarker(lat, lng, type) {
+        var latlng = [lat, lng];
+        var marker = L.marker(latlng).addTo(map);
+        markers.push({ marker: marker, type: type });
+    }
+
+    // Function to plot the shortest path on the map
+    function plotShortestPath(path) {
+        var latlngs = path.map(node => coordinates[node]);
+
         if (line) {
             map.removeLayer(line);
         }
-        line = L.polyline(latlngs, { color: 'red' }).addTo(map);
+        line = L.polyline(latlngs, { color: 'blue' }).addTo(map);
 
-        // Calculate the distance between the points
-        var distance = latlngs[0].distanceTo(latlngs[1]); // Distance in meters
-        var distanceInKm = (distance / 1000).toFixed(2);
+        // Optionally, zoom the map to fit the path
+        map.fitBounds(line.getBounds());
+    }
 
-        document.getElementById('distance').innerText = `Distance: ${distanceInKm} km`;
+    // Function to calculate shortest path using Dijkstra's algorithm
+    function dijkstra(graph, start, end) {
+        let distances = {};
+        let previous = {};
+        let nodes = new PriorityQueue();
+
+        for (let node in graph) {
+            if (node === start) {
+                distances[node] = 0;
+                nodes.enqueue(node, 0);
+            } else {
+                distances[node] = Infinity;
+                nodes.enqueue(node, Infinity);
+            }
+            previous[node] = null;
+        }
+
+        while (!nodes.isEmpty()) {
+            let smallest = nodes.dequeue();
+            if (smallest === end) {
+                let path = [];
+                while (previous[smallest]) {
+                    path.push(smallest);
+                    smallest = previous[smallest];
+                }
+                path.push(start);
+                return path.reverse();
+            }
+
+            if (distances[smallest] === Infinity) {
+                break;
+            }
+
+            for (let neighbor in graph[smallest]) {
+                let alt = distances[smallest] + graph[smallest][neighbor];
+                if (alt < distances[neighbor]) {
+                    distances[neighbor] = alt;
+                    previous[neighbor] = smallest;
+                    nodes.enqueue(neighbor, distances[neighbor]);
+                }
+            }
+        }
+
+        return [];
+    }
+
+    // Priority Queue implementation
+    class PriorityQueue {
+        constructor() {
+            this.collection = [];
+        }
+
+        enqueue(element, priority) {
+            this.collection.push({ element, priority });
+            this.collection.sort((a, b) => a.priority - b.priority);
+        }
+
+        dequeue() {
+            return this.collection.shift().element;
+        }
+
+        isEmpty() {
+            return this.collection.length === 0;
+        }
     }
 
     // Clear markers and reset the map
     function clearMarkers() {
-        markers.forEach(function(marker) {
-            map.removeLayer(marker);
+        markers.forEach(function(item) {
+            map.removeLayer(item.marker);
         });
         markers = [];
 
@@ -86,6 +184,9 @@
 
     // Attach clear function to the Clear button
     document.getElementById('clearButton').addEventListener('click', clearMarkers);
+
+    // Fetch coordinates when the page loads
+    fetchCoordinates();
 </script>
 
 </body>
