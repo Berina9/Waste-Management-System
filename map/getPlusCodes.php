@@ -10,10 +10,16 @@ try {
     }
 
     // Fetch coordinates from tbl_driver
-    $driverStmt = $conn->query("SELECT location FROM tbl_driver");
+    $driverStmt = $conn->query("SELECT location FROM tbl_driver where status='0'");
     $driverCoordinates = [];
     while ($row = $driverStmt->fetch_assoc()) {
         $driverCoordinates[] = $row['location'];
+    }
+
+    $drivercomStmt = $conn->query("SELECT location FROM tbl_driver where status='1'");
+    $drivercomCoordinates = [];
+    while ($row = $drivercomStmt->fetch_assoc()) {
+        $drivercomCoordinates[] = $row['location'];
     }
 
     // Fetch coordinates from tbl_container
@@ -42,7 +48,8 @@ while ($row = $diveStmt->fetch_assoc()) {
         'adminCoordinates' => $adminCoordinates,
         'driverCoordinates' => $driverCoordinates,
         'containerCoordinates' => $containerCoordinates,
-        'driverid' => $driverid
+        'driverid' => $driverid,
+        'drivercomCoordinates'=>$drivercomCoordinates,
     ];
 
     // Return the coordinates as JSON

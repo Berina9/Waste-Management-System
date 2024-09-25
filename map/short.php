@@ -108,6 +108,23 @@
                     }
                 });
 
+                data.drivercomCoordinates.forEach((coord, index) => {
+                    if (coord) {
+                        var location = coord.trim(); // Remove any extraneous whitespace or newline
+                        if (location) {
+                            var [lat, lng] = location.split(',').map(Number);
+                            if (isValidCoordinate(lat, lng)) {
+                                coordinates['driver' + index] = [lat, lng];
+                                addMarker(lat, lng, 'drivercom'); // Using driver coordinates for green markers
+                            } else {
+                                console.error('Invalid driver coordinate:', location);
+                            }
+                        } else {
+                            console.error('Empty location field for driver coordinate:', coord);
+                        }
+                    }
+                });
+
                 // Example graph data
                 graph = {
                     'container0': { 'node1': 10, 'node2': 15 },
@@ -135,8 +152,13 @@
 
         if (type === 'driver') {
             marker = L.marker(latlng, { icon: L.divIcon({ className: 'custom-marker', html: '<div style="background-color: green; width: 12px; height: 12px; border-radius: 50%;"></div>' }) }).addTo(map);
-        } else {
+        } 
+        else if(type === 'drivercom') {
+            marker = L.marker(latlng, { icon: L.divIcon({ className: 'custom-marker', html: '<div style="background-color: red; width: 12px; height: 12px; border-radius: 50%;"></div>' }) }).addTo(map);
+        }
+        else{
             marker = L.marker(latlng).addTo(map);
+
         }
 
         markers.push({ marker: marker, type: type });
