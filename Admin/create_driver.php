@@ -5,7 +5,7 @@ function handleFormSubmission() {
     if ($conn->connect_error) die("Connection failed: " . $conn->connect_error);
 
     if ($_SERVER["REQUEST_METHOD"] == "POST" && isset( $_POST['name'], $_POST['email'], $_POST['password'], $_POST['area'], $_POST['phoneno'])) {
-        $stmt = $conn->prepare("INSERT INTO tbl_profile ( Name, Email, Password, Area, Phoneno) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt = $conn->prepare("INSERT INTO tbl_driver ( usernamer, Email, Password, address) VALUES (?, ?, ?, ?, ?, ?)");
         
         $stmt->bind_param("isssss", $_POST['name'], $_POST['email'], $_POST['password'], $_POST['area'], $_POST['phoneno']);
         if ($stmt->execute()) {

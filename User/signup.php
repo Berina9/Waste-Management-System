@@ -81,6 +81,7 @@ if (isset($_POST['submit'])) {
             <input type="password" id="confirm_password" name="confirm_password" required><br><br>
             <input type="submit" id="btn" value="Signup" name="submit"/><br>
         </form>
+       
     </div>
 </body>
 </html>

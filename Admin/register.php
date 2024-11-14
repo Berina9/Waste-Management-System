@@ -14,7 +14,7 @@ if ($conn->connect_error) {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['name'], $_POST['email'], $_POST['password'], $_POST['phone'])) {
-    $stmt = $conn->prepare("INSERT INTO tbl_profile (Name, Email, Password, PhoneNo) VALUES (?, ?, ?, ?)");
+    $stmt = $conn->prepare("INSERT INTO tbl_driver (username, Email, Password, address) VALUES (?, ?, ?, ?)");
     $stmt->bind_param("ssss", $_POST['name'], $_POST['email'], password_hash($_POST['password'], PASSWORD_DEFAULT), $_POST['phone']);
 
    
